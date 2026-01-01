@@ -18,8 +18,8 @@ auth, while `/health` stays public.
 Use either header:
 - `Authorization: Bearer <token>`
 - `X-API-Key: <token>`
-For file downloads you can also pass `token` or `access_token` as a query
-parameter, for example: `/files/<name>.pdf?token=<token>`.
+When enabled, `/render`, `/render/html`, and `/render/link` require auth. File
+downloads from `/files/...` are public by design.
 
 ## Endpoints
 
@@ -91,11 +91,12 @@ curl -X POST "http://<host>:8080/render/link?filename=PI-2025-0001" \
 ### GET /files/{file_name}
 
 Downloads a previously stored PDF by filename. If the file is expired it will
-return 404 and remove it.
+return 404 and remove it. This endpoint is public; anyone with the link can
+download the file.
 
 Example:
 ```bash
-curl -L "http://<host>:8080/files/<name>.pdf?token=<token>" -o out.pdf
+curl -L "http://<host>:8080/files/<name>.pdf" -o out.pdf
 ```
 
 ## Request data format

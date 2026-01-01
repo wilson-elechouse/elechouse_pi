@@ -214,7 +214,6 @@ async def render_link(
 @app.get("/files/{file_name}", name="download_file")
 async def download_file(
     file_name: str,
-    _: None = Depends(_require_token),
 ) -> FileResponse:
     if Path(file_name).name != file_name or not file_name.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="invalid filename")
