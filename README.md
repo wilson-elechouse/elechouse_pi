@@ -18,6 +18,8 @@ auth, while `/health` stays public.
 Use either header:
 - `Authorization: Bearer <token>`
 - `X-API-Key: <token>`
+For file downloads you can also pass `token` or `access_token` as a query
+parameter, for example: `/files/<name>.pdf?token=<token>`.
 
 ## Endpoints
 
@@ -62,6 +64,38 @@ curl -X POST "http://<host>:8080/render/html?template=proforma_invoice.html" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   --data @data/proforma_invoice.json -o out.html
+```
+
+### POST /render/link
+
+Returns JSON with a temporary download URL and filename. The PDF is stored on
+the server and cleaned up automatically after the TTL.
+
+Response:
+```json
+{
+  "url": "http://<host>:8080/files/PI-2025-0001-20250202T120102Z-acde1234ef.pdf",
+  "filename": "PI-2025-0001-20250202T120102Z-acde1234ef.pdf",
+  "expires_in": 3600
+}
+```
+
+Example:
+```bash
+curl -X POST "http://<host>:8080/render/link?filename=PI-2025-0001" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  --data @data/proforma_invoice.json
+```
+
+### GET /files/{file_name}
+
+Downloads a previously stored PDF by filename. If the file is expired it will
+return 404 and remove it.
+
+Example:
+```bash
+curl -L "http://<host>:8080/files/<name>.pdf?token=<token>" -o out.pdf
 ```
 
 ## Request data format
@@ -205,6 +239,24 @@ Top-level fields:
 
 If you need different defaults, update the template with Jinja2 `default` filters
 or pre-fill missing values in the JSON payload.
+
+## Temporary file storage (scheme A)
+
+The `/render/link` endpoint writes PDFs to the local storage directory and
+returns a download URL. Files are automatically removed after the TTL.
+
+Environment variables:
+
+| Name | Default | Description |
+| --- | --- | --- |
+| PDF_STORAGE_DIR | `/app/storage` | Directory to store PDFs |
+| PDF_TTL_SECONDS | `3600` | Time-to-live in seconds; `0` disables cleanup |
+| PUBLIC_BASE_URL | empty | If set, download URLs use this base |
+
+Manual cleanup (optional):
+```bash
+rm -f /opt/myapp/storage/*.pdf
+```
 
 ## Local run
 
