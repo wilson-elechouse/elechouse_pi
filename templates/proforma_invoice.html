@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Proforma Invoice</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm; }
+    html, body { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
+    .wrap { max-width: 780px; margin: 0 auto; }
+    h1 { font-size: 20px; letter-spacing: 1px; margin: 0 0 8px; }
+    .muted { color: #666; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .box { border: 1px solid #333; padding: 10px; border-radius: 6px; }
+    .kv { line-height: 1.5; }
+    .kv .row { display: grid; grid-template-columns: 140px 1fr; gap: 6px 10px; align-items: start; }
+    .kv .label { font-weight: 700; }
+    .kv .value { word-break: break-word; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #333; padding: 6px; vertical-align: top; }
+    th { background: #f2f2f2; text-align: left; }
+    tfoot td { border: none; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+    .small { font-size: 11px; }
+    .spacer { height: 8px; }
+    /* Tight spacing for totals box (right column in tfoot) */
+    .tight { line-height: 1.05; padding-top: 2px; padding-bottom: 2px; }
+    /* Stamp image near signature */
+    .stamp { height: 100px; float: right; margin-top: -6px; }
+  </style>
+</head>
+<body>
+  {% macro join_address(a) -%}
+    {%- set parts = [] -%}
+    {%- if a.line1 %}{% set parts = parts + [a.line1] %}{% endif -%}
+    {%- if a.line2 %}{% set parts = parts + [a.line2] %}{% endif -%}
+    {%- if a.city %}{% set parts = parts + [a.city] %}{% endif -%}
+    {%- if a.state and a.postal -%}
+      {% set parts = parts + [a.state ~ ' ' ~ a.postal] %}
+    {%- elif a.state -%}
+      {% set parts = parts + [a.state] %}
+    {%- elif a.postal -%}
+      {% set parts = parts + [a.postal] %}
+    {%- endif -%}
+    {%- if a.country %}{% set parts = parts + [a.country] %}{% endif -%}
+    {{ parts | join(', ') }}
+  {%- endmacro %}
+
+  <div class="wrap">
+    <table style="border:none">
+      <tr>
+        <td style="border:none; width:50%">
+          <div class="small muted">
+            <b>{{ seller.name }}</b><br/>
+            {{ join_address(seller.address) }}<br/>
+            Website: {{ seller.website }}<br/>
+            Email: {{ seller.email }}
+          </div>
+        </td>
+        <td class="right" style="border:none; width:50%">
+          <h1>PROFORMA INVOICE</h1>
+          <div class="kv">
+            <div class="row"><span class="label">PI No.</span><span class="value">{{ invoice.number }}</span></div>
+            <div class="row"><span class="label">Date</span><span class="value">{{ invoice.date }}</span></div>
+            <div class="row"><span class="label">Incoterm</span><span class="value">{{ invoice.incoterm }}</span></div>
+            <div class="row"><span class="label">Currency</span><span class="value">{{ invoice.currency }}</span></div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="spacer"></div>
+
+    <div class="grid-2">
+      <div class="box">
+        <b>Buyer</b>
+        <div class="kv small">
+          <div class="row"><span class="label">Name</span><span class="value">{{ buyer.name }}</span></div>
+          <div class="row"><span class="label">Company</span><span class="value">{{ buyer.company }}</span></div>
+          <div class="row"><span class="label">Address</span><span class="value">{{ join_address(buyer.address) }}</span></div>
+          <div class="row"><span class="label">Contact</span><span class="value">{{ buyer.contact }}{% if buyer.phone %} &nbsp; {{ buyer.phone }}{% endif %}</span></div>
+          <div class="row"><span class="label">Email</span><span class="value">{{ buyer.email }}</span></div>
+          {% if buyer.tax_id %}<div class="row"><span class="label">Tax ID/VAT</span><span class="value">{{ buyer.tax_id }}</span></div>{% endif %}
+        </div>
+      </div>
+      <div class="box">
+        <b>Ship To</b>
+        <div class="small">
+          {{ ship_to.name or buyer.name }}<br/>
+          {{ join_address(ship_to.address) }}<br/>
+          {% set tel = ship_to.phone or buyer.phone %}{% if tel %}Tel: {{ tel }}{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20px">#</th>
+          <th>Description</th>
+          <th style="width:60px">HS Code</th>
+          <th style="width:40px">Qty</th>
+          <th style="width:40px">Unit</th>
+          <th style="width:60px">Unit Price</th>
+          <th style="width:60px">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i, item in enumerate(items, start=1) %}
+        <tr>
+          <td class="center">{{ i }}</td>
+          <td>
+            <b>{{ item.name }}</b><br/>
+            <span class="small">{{ item.model }}</span><br/>
+            <span class="small">{{ item.desc }}</span>
+          </td>
+          <td >{{ item.hs_code }}</td>
+          <td >{{ item.qty }}</td>
+          <td >{{ item.uom }}</td>
+          <td >{{ '%.2f'|format(item.unit_price) }}</td>
+          <td class="right">{{ '%.2f'|format(item.qty * item.unit_price) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" rowspan="7" style="border:none">
+            <div class="small">
+              <b>Shipping Terms:</b> {{ terms.shipping }}<br/>
+              <b>Payment Terms:</b> {{ terms.payment }}<br/>
+              <b>Lead Time:</b> {{ terms.lead_time }}<br/>
+              <b>Offer Validity:</b> {{ terms.offer_validity }}<br/>
+              {% if notes %}<b>Notes:</b> {{ notes }}{% endif %}
+            </div>
+          </td>
+          <td class="right tight"><b>Subtotal</b></td>
+          <td class="right tight">{{ '%.2f'|format(totals.subtotal) }}</td>
+        </tr>
+        <tr>
+          <td class="right tight"><b>Shipping</b></td>
+          <td class="right tight">{{ '%.2f'|format(totals.shipping) }}</td>
+        </tr>
+        <tr>
+          <td class="right tight"><b>Insurance</b></td>
+          <td class="right tight">{{ '%.2f'|format(totals.insurance) }}</td>
+        </tr>
+        <tr>
+          <td class="right tight"><b>Discount</b></td>
+          <td class="right tight">{{ ('-' if (totals.discount|float) > 0 else '') ~ ('%.2f'|format(totals.discount|abs)) }}</td>
+        </tr>
+        <tr>
+          <td class="right tight"><b>Tax/VAT</b></td>
+          <td class="right tight">{{ '%.2f'|format(totals.tax) }}</td>
+        </tr>
+        <tr>
+          <td class="right tight"><b>Grand Total</b></td>
+          <td class="right tight"><b>{{ '%.2f'|format(totals.grand_total) }}</b></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="spacer"></div>
+
+    <div class="grid-2">
+      <div class="box small">
+        <b>Bank Details</b>
+        <div class="kv">
+          <div class="row"><span class="label">Beneficiary</span><span class="value">{{ bank.beneficiary }}</span></div>
+          <div class="row"><span class="label">Bank</span><span class="value">{{ bank.name }}</span></div>
+          <div class="row"><span class="label">Account No.</span><span class="value">{{ bank.account_no }}</span></div>
+          <div class="row"><span class="label">SWIFT</span><span class="value">{{ bank.swift }}</span></div>
+          <div class="row"><span class="label">Address</span><span class="value">{{ bank.address }}</span></div>
+          {% if bank.iban %}<div class="row"><span class="label">IBAN</span><span class="value">{{ bank.iban }}</span></div>{% endif %}
+          {% if bank.notes %}<div class="row"><span class="label">Notes</span><span class="value">{{ bank.notes }}</span></div>{% endif %}
+        </div>
+      </div>
+      <div class="box small">
+        <b>Declaration</b>
+        <div>
+          We declare the goods are of non-restricted use and comply with relevant regulations.
+        </div>
+        <div style="margin-top:18px; position: relative; min-height: 60px;">
+          <div><b>Authorized Signature</b> __________________________</div>
+          <img class="stamp" src="http://www.elechouse.com/elechouse/ELECHOUSE_stamp.png" alt="Company Stamp"/>
+          <div class="muted">Company Seal (if applicable)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

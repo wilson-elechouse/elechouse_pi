@@ -1,0 +1,85 @@
+{
+  "seller": {
+    "name": "HK ELECHOUSE LIMITED",
+    "website": "https://www.elechouse.com",
+    "address": {
+      "line1": "Room A516, 5/F, Yip Fat Industrial Building",
+      "line2": "3-5 Tai Yau Street, San Po Kong, Kowloon",
+      "city": "Hong Kong",
+      "state": "",
+      "postal": "",
+      "country": "Hong Kong"
+    },
+    "phone": "",
+    "email": "elechouse@elechouse.com"
+  },
+  "invoice": {
+    "number": "PI-20251014-001",
+    "date": "2025-10-14",
+    "incoterm": "DAP (duties & taxes unpaid)",
+    "currency": "USD"
+  },
+  "buyer": {
+    "name": "",
+    "company": "",
+    "contact": "",
+    "phone": "",
+    "email": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "city": "",
+      "state": "",
+      "postal": "",
+      "country": ""
+    },
+    "tax_id": ""
+  },
+  "ship_to": {
+    "name": "",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "city": "",
+      "state": "",
+      "postal": "",
+      "country": ""
+    },
+    "phone": ""
+  },
+  "items": [
+    {
+      "name": "PN532 NFC/RFID Module V4",
+      "model": "NFC_PN532_V4",
+      "desc": "13.56MHz NFC/RFID reader/writer module",
+      "hs_code": "8517699000",
+      "qty": 300,
+      "uom": "pcs",
+      "unit_price": 14.9
+    }
+  ],
+  "terms": {
+    "shipping": "Express shipping",
+    "payment": "T/T 100% in advance",
+    "lead_time": "2 business days after payment",
+    "offer_validity": "7 days"
+  },
+  "totals": {
+    "subtotal": 4470.0,
+    "shipping": 150.0,
+    "insurance": 0.0,
+    "discount": 0.0,
+    "tax": 0.0,
+    "grand_total": 4620.0
+  },
+  "bank": {
+    "beneficiary": "HK ELECHOUSE LIMITED",
+    "name": "CITIBANK N.A. HONG KONG BRANCH",
+    "account_no": "342501418",
+    "swift": "CITIHKHX",
+    "iban": "",
+    "address": "Champion Tower, Three Garden Road, Central, Hong Kong",
+    "notes": "For the bank charge, please choose OUR instead of SHARE. Include PI NO."
+  },
+  "notes": "Buyer responsible for import duties & taxes under DAP (duties & taxes unpaid)."
+}

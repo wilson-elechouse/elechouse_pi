@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+output/
+.env
+*.pdf
+deploy_key
+deploy_key.pub
